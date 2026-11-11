@@ -4,6 +4,10 @@ import OpenAI from "openai";
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 const MAX_FACT_LENGTH = 600;
 
+// Hard upper bound for one generation, retries included. The fact
+// generation lock (LOCK_TTL_MS in lib/facts/get-fact.ts) relies on this.
+const GENERATION_DEADLINE_MS = 20_000;
+
 const INSTRUCTIONS = [
   "You share fun, accurate trivia about movies.",
   "Reply with one surprising fact about the given movie in one or two sentences.",
@@ -19,19 +23,24 @@ function getClient() {
   client ??= new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     // A slow answer is worse than no answer here, so fail fast and retry once.
-    timeout: 10_000,
+    timeout: 8_000,
     maxRetries: 1,
   });
   return client;
 }
 
 export async function generateMovieFact(movieTitle: string): Promise<string> {
-  const response = await getClient().responses.create({
-    model: MODEL,
-    instructions: INSTRUCTIONS,
-    input: `Movie title: ${movieTitle}`,
-    max_output_tokens: 200,
-  });
+  const response = await getClient().responses.create(
+    {
+      model: MODEL,
+      instructions: INSTRUCTIONS,
+      input: `Movie title: ${movieTitle}`,
+      max_output_tokens: 200,
+    },
+    // The per-attempt timeout alone isn't enough: retries and the SDK's
+    // backoff (which can honor a Retry-After header) add up.
+    { signal: AbortSignal.timeout(GENERATION_DEADLINE_MS) },
+  );
 
   const fact = response.output_text.trim();
   if (!fact) throw new Error("OpenAI returned an empty fact");

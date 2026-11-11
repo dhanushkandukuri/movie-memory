@@ -1,23 +1,19 @@
-import { createMovieFact } from "@/lib/facts";
+import { FACT_ERROR_MESSAGES, getFact, type FactSource } from "@/lib/facts";
 import { RefreshFactButton } from "./refresh-fact-button";
 
-type FunFactProps = {
-  userId: string;
-  movieTitle: string;
+const SOURCE_NOTES: Record<FactSource, string> = {
+  generated: "Fresh from the projector.",
+  cache: "New facts are available once a minute, so this is your latest one.",
+  fallback: "We couldn't get a new fact just now, so here's your most recent one.",
 };
 
-export async function FunFact({ userId, movieTitle }: FunFactProps) {
-  let fact: Awaited<ReturnType<typeof createMovieFact>>;
-  try {
-    fact = await createMovieFact(userId, movieTitle);
-  } catch (error) {
-    // Just the message: the full OpenAI error includes response headers we don't want in logs.
-    console.error("[fun-fact] generation failed:", error instanceof Error ? error.message : error);
+export async function FunFact({ userId }: { userId: string }) {
+  const result = await getFact(userId);
+
+  if (!result.ok) {
     return (
       <div className="space-y-4">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          We couldn&apos;t come up with a fun fact right now. Please try again in a moment.
-        </p>
+        <p className="text-zinc-600 dark:text-zinc-400">{FACT_ERROR_MESSAGES[result.error]}</p>
         <RefreshFactButton label="Try again" />
       </div>
     );
@@ -25,8 +21,11 @@ export async function FunFact({ userId, movieTitle }: FunFactProps) {
 
   return (
     <div className="space-y-4">
-      <p className="text-lg leading-relaxed">{fact.content}</p>
-      <RefreshFactButton label="Get another fact" />
+      <p className="text-lg leading-relaxed">{result.fact.content}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-zinc-500">{SOURCE_NOTES[result.source]}</p>
+        <RefreshFactButton label="Get another fact" />
+      </div>
     </div>
   );
 }

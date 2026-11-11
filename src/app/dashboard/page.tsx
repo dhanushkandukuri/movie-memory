@@ -50,7 +50,7 @@ export default async function DashboardPage() {
           {/* The OpenAI call can take a few seconds, so stream it in instead of
               holding up the rest of the page. */}
           <Suspense fallback={<FunFactSkeleton />}>
-            <FunFact userId={userId} movieTitle={user.favoriteMovie} />
+            <FunFact userId={userId} />
           </Suspense>
         </section>
       </main>
