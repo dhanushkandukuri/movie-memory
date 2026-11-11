@@ -96,7 +96,7 @@ Open http://localhost:3000.
 | `npm run build` / `npm start` | Production build / serve it |
 | `npm test` | Backend tests (no database or API keys needed) |
 | `npm run lint` | ESLint |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | Generates Next's route types (`next typegen`), then runs `tsc --noEmit` |
 | `npm run db:deploy` | Apply migrations |
 | `npm run db:migrate` | Create and apply a new migration in development |
 
