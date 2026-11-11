@@ -417,17 +417,16 @@ Separately, against the local database (`npx prisma dev`) and the real OpenAI AP
 
 ## AI usage
 
-- I used Claude Code (Anthropic's coding agent) as a pair programmer throughout: project setup
-  (Next.js 16, Prisma 7, Auth.js v5), implementing the features, writing the tests and drafting this
-  README.
-- I worked in small chunks. The AI wrote a piece, I reviewed and ran it, then committed it myself, so
+- I used Claude Code, and Codex as a pair programmer throughout: project setup
+  (Next.js 16, Prisma 7, Auth.js v5), drafting the features when I told the ais on how I want the feture to be written, writing the tests and drafting this README.
+- I worked in small chunks. The AI wrote a piece, I reviewed, reinvented, changed and ran it, then committed it myself, so
   the commit history follows those chunks.
 - I talked through the Variant A design with it (lock options, TTL vs. OpenAI deadline, the second
   cache check, the order of the waiter's checks) and picked the database lease lock for the reasons
   above.
 - It also helped verify the work: running the burst and fallback scenarios against the real database
   and OpenAI, and breaking the code on purpose to confirm the tests fail.
-- Its output wasn't always right the first time. Examples were a migration setup that clashed with the
+- Its output wasn't always right the first time. Made manual changes, and asked agent whether I have the correct approach or if there is a better approach. Examples were a migration setup that clashed with the
   local Prisma dev database, an avatar fallback that didn't fire before hydration, and error logging
   that dumped OpenAI request headers. Each one was caught by running the app or the tests, then fixed.
-- I used a second AI to review the README; it suggested expanding the lock and second-check sections.
+- I used a second agent to review the README; it suggested expanding the lock and second-check sections.
