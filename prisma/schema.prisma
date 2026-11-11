@@ -18,9 +18,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  facts    MovieFact[]
+  accounts           Account[]
+  sessions           Session[]
+  facts              MovieFact[]
+  factGenerationLock FactGenerationLock?
 }
 
 // Account and Session are the tables @auth/prisma-adapter reads and writes.
@@ -70,4 +71,17 @@ model MovieFact {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, movieTitle, createdAt(sort: Desc)])
+}
+
+// At most one fact generation per user at a time. A row exists only while a
+// request is calling OpenAI; other requests see it and wait for that result
+// instead of starting their own call. `expiresAt` makes the lock a lease, so a
+// crashed or timed-out request can't block the user forever.
+model FactGenerationLock {
+  userId    String   @id
+  // random id per request, so a request can only ever release its own lock
+  token     String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
