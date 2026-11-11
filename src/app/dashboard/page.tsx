@@ -1,13 +1,14 @@
+import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/auth-buttons";
-import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/session";
+import { getUserProfile } from "@/lib/users";
 
 export default async function DashboardPage() {
   const userId = await requireUserId();
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { name: true, email: true },
-  });
+  const user = await getUserProfile(userId);
+
+  // First-time users land here straight after Google sign-in.
+  if (!user?.favoriteMovie) redirect("/onboarding");
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-12">
@@ -15,7 +16,8 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <SignOutButton />
       </div>
-      <p>Signed in as {user?.name ?? user?.email ?? "you"}.</p>
+      <p>Signed in as {user.name ?? user.email ?? "you"}.</p>
+      <p>Favorite movie: {user.favoriteMovie}</p>
     </main>
   );
 }
