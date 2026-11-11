@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { SignOutButton } from "@/components/auth-buttons";
 import { UserAvatar } from "@/components/user-avatar";
 import { requireUserId } from "@/lib/session";
 import { getUserProfile } from "@/lib/users";
+import { FunFact, FunFactSkeleton } from "./fun-fact";
 
 export default async function DashboardPage() {
   const userId = await requireUserId();
@@ -39,6 +41,17 @@ export default async function DashboardPage() {
             Favorite movie
           </h2>
           <p className="mt-2 break-words text-2xl font-semibold">{user.favoriteMovie}</p>
+        </section>
+
+        <section className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-zinc-500">
+            Fun fact
+          </h2>
+          {/* The OpenAI call can take a few seconds, so stream it in instead of
+              holding up the rest of the page. */}
+          <Suspense fallback={<FunFactSkeleton />}>
+            <FunFact userId={userId} movieTitle={user.favoriteMovie} />
+          </Suspense>
         </section>
       </main>
     </div>
