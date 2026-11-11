@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { MOVIE_TITLE_MAX_LENGTH } from "@/lib/movie-title";
 import { requireUserId } from "@/lib/session";
 import { getUserProfile } from "@/lib/users";
 import { OnboardingForm } from "./onboarding-form";
@@ -22,7 +23,8 @@ export default async function OnboardingPage() {
           What&apos;s your favorite movie? We&apos;ll use it to find you fun facts.
         </p>
       </div>
-      <OnboardingForm />
+      {/* Passed in rather than imported by the form, so zod stays out of the browser bundle. */}
+      <OnboardingForm maxLength={MOVIE_TITLE_MAX_LENGTH} />
     </main>
   );
 }

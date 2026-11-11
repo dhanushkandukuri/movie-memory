@@ -1,12 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
-import { MOVIE_TITLE_MAX_LENGTH } from "@/lib/movie-title";
 import { saveFavoriteMovie, type OnboardingState } from "./actions";
 
 const initialState: OnboardingState = {};
 
-export function OnboardingForm() {
+export function OnboardingForm({ maxLength }: { maxLength: number }) {
   const [state, formAction, pending] = useActionState(saveFavoriteMovie, initialState);
 
   return (
@@ -20,7 +19,7 @@ export function OnboardingForm() {
         name="favoriteMovie"
         type="text"
         required
-        maxLength={MOVIE_TITLE_MAX_LENGTH}
+        maxLength={maxLength}
         defaultValue={state.value}
         placeholder="e.g. Spirited Away"
         autoComplete="off"
